@@ -12,25 +12,40 @@ function Dashboard() {
 
   const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState([]);
+  const [page, setPage] = useState(1);
+  const [name, setName] = useState('');
 
+
+  const fetchDoctors = async (page, limit, name) => {
+    setLoading(true); 
+    try {
+      const response = await axios.get(`${apiUrl}/admin/doctors`, {
+        params: { page, limit, name },
+        ...getAxiosConfig(),
+      });
+      if (response.status === 200) {
+        setDoctors(response.data.doctors || []) ;
+        console.log('Fetched Doctors:', response.data.doctors);
+      }
+    } catch (error) {
+      console.error(error.message);
+    } finally {
+      setLoading(false); 
+    }
+  };
 
   useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const response = await axios.get(`${apiUrl}/admin/doctors`, getAxiosConfig());
-        if (response.status === 200) {
-          setDoctors(response.data.doctors);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error(error.message);
-      }
-    };
-
-    fetchDoctors();
-  }, []);
+    fetchDoctors(page, 10, name); 
+  }, [page, name]);
 
 
+  const handleNextPage = () => {
+    setPage((prevPage) => prevPage + 1);    
+  };
+
+  const handlePreviousPage = () => {
+    setPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
 
   return (
     <div>
@@ -44,9 +59,22 @@ function Dashboard() {
           </Link>
         </div>
 
+        <button onClick={handleNextPage}>next</button>
+        <button onClick={handlePreviousPage}> previous</button>
+
+        <div className='search m-4'>
+          <input
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-primary"
+            type="text"
+            placeholder="Seach doctors..."
+            value={name} 
+            onChange={(e) =>setName(e.target.value)}
+          />
+        </div>
+
         {loading ? (
           <Loader />
-        ) : (
+        )  : (
           <div className="mt-4">
             <table className="w-full border shadow-lg rounded-lg">
               <thead>

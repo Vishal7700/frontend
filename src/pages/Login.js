@@ -36,7 +36,7 @@ function Login() {
       }
     } catch (err) {
       if (err.response.status === 401) {
-        toast.error("Invalid email or password")
+        toast.error("Invalid email or password") 
       }
     }
   }
