@@ -3,7 +3,7 @@ import Navbar from './Navbar'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons/faPlusCircle'
-import { faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons'
+import {  faPenToSquare, faShare, faTrash } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios'
 import { apiUrl, getAxiosConfig } from '../config.js'
 import Loader from '../loaders/Loader.js'
@@ -14,7 +14,7 @@ function Dashboard() {
   const [doctors, setDoctors] = useState([]);
   const [page, setPage] = useState(1);
   const [name, setName] = useState('');
-
+  
 
   const fetchDoctors = async (page, limit, name) => {
     setLoading(true); 
@@ -25,7 +25,6 @@ function Dashboard() {
       });
       if (response.status === 200) {
         setDoctors(response.data.doctors || []) ;
-        console.log('Fetched Doctors:', response.data.doctors);
       }
     } catch (error) {
       console.error(error.message);
@@ -92,9 +91,12 @@ function Dashboard() {
                     <td className="py-3 px-12 text-left">{doctor.email}</td>
                     <td className="py-3 px-6 text-left">{doctor.phonenumber}</td>
                     <td className="py-3 px-12 text-left">
-                      <div className="flex gap-4">
-                        <FontAwesomeIcon color="teal" title="Update" icon={faPenToSquare} />
-                        <FontAwesomeIcon color="red" title="Delete" icon={faTrash} />
+                      <div className="flex gap-2">
+                        <FontAwesomeIcon className='text-sm' color="teal" title="Update" icon={faPenToSquare} />
+                        <FontAwesomeIcon className='text-sm' color="red" title="Delete" icon={faTrash} />
+                        <Link to={`/profile`} className="flex items-center">
+                          <FontAwesomeIcon className='text-sm' color="green" title="Profile" icon={faShare} />
+                        </Link>
                       </div>
                     </td>
                   </tr>
