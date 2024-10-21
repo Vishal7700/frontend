@@ -9,7 +9,7 @@ function Navbar() {
   return (
     <div className="flex flex-col md:flex-row p-4 bg-primary text-white justify-between items-center">
       <div className='flex items-center ml-6 mb-2 md:mb-0'>
-        <p className="text-xl font-raleway">MedVisit</p>
+        <Link to={"/dashboard"}><p className="text-xl font-raleway">MedVisit</p></Link>
       </div>
       <ul className="flex gap-8 mr-6">
         <li className="flex items-center gap-2 cursor-pointer hover:underline">

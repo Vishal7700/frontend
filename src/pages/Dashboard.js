@@ -3,7 +3,7 @@ import Navbar from './Navbar'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons/faPlusCircle'
-import {  faPenToSquare, faShare, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faPenToSquare, faShare, faTrash } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios'
 import { apiUrl, getAxiosConfig } from '../config.js'
 import Loader from '../loaders/Loader.js'
@@ -14,32 +14,32 @@ function Dashboard() {
   const [doctors, setDoctors] = useState([]);
   const [page, setPage] = useState(1);
   const [name, setName] = useState('');
-  
+
 
   const fetchDoctors = async (page, limit, name) => {
-    setLoading(true); 
+    setLoading(true);
     try {
       const response = await axios.get(`${apiUrl}/admin/doctors`, {
         params: { page, limit, name },
         ...getAxiosConfig(),
       });
       if (response.status === 200) {
-        setDoctors(response.data.doctors || []) ;
+        setDoctors(response.data.doctors || []);
       }
     } catch (error) {
       console.error(error.message);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDoctors(page, 10, name); 
+    fetchDoctors(page, 10, name);
   }, [page, name]);
 
 
   const handleNextPage = () => {
-    setPage((prevPage) => prevPage + 1);    
+    setPage((prevPage) => prevPage + 1);
   };
 
   const handlePreviousPage = () => {
@@ -58,22 +58,21 @@ function Dashboard() {
           </Link>
         </div>
 
-        <button onClick={handleNextPage}>next</button>
-        <button onClick={handlePreviousPage}> previous</button>
+
 
         <div className='search m-4'>
           <input
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-primary"
             type="text"
             placeholder="Seach doctors..."
-            value={name} 
-            onChange={(e) =>setName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
 
         {loading ? (
           <Loader />
-        )  : (
+        ) : (
           <div className="mt-4">
             <table className="w-full border shadow-lg rounded-lg">
               <thead>
@@ -94,7 +93,7 @@ function Dashboard() {
                       <div className="flex gap-2">
                         <FontAwesomeIcon className='text-sm' color="teal" title="Update" icon={faPenToSquare} />
                         <FontAwesomeIcon className='text-sm' color="red" title="Delete" icon={faTrash} />
-                        <Link to={`/profile`} className="flex items-center">
+                        <Link to={`/profile/${doctor._id}`} className="flex items-center">
                           <FontAwesomeIcon className='text-sm' color="green" title="Profile" icon={faShare} />
                         </Link>
                       </div>
@@ -103,6 +102,12 @@ function Dashboard() {
                 ))}
               </tbody>
             </table>
+            <div className='flex justify-center gap-8 mt-4'>
+                <button className="w-20 bg-button text-white font-raleway rounded-lg py-2 hover:bg-buttonHover transition" onClick={handlePreviousPage}>Previous</button>
+              <p className='flex items-center justify-center border-2 border-primary border-opacity-50 rounded-lg px-4'>{page}</p>
+                <button className="w-20 bg-button text-white font-raleway rounded-lg py-2 hover:bg-buttonHover transition" onClick={handleNextPage}>Next</button>
+              </div>
+
           </div>
         )}
       </div>

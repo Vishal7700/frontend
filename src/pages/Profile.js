@@ -1,75 +1,115 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from './Navbar'
+import axios from 'axios';
+import { apiUrl, getAxiosConfig } from '../config.js'
+import { useLocation } from 'react-router-dom';
+
+
+
 
 function Profile() {
 
-    const doctor = {
-        photo: 'https://wallpapers.com/images/featured/cool-profile-picture-87h46gcobjl5e4xu.jpg',
-        name: 'Dr. John Doe',
-        email: 'johndoe@email.com',
-        phone: '+123 456 7890',
-        address: '123 Clinic Street, City',
-        specialization: 'Cardiology',
-        experience: '10 years',
-        timeslots: {
-            Monday: '9:00 AM - 12:00 PM',
-            Tuesday: '1:00 PM - 4:00 PM',
-            Wednesday: '9:00 AM - 12:00 PM',
-            Thursday: '1:00 PM - 4:00 PM',
-            Friday: '9:00 AM - 12:00 PM',
-            Saturday: '9:00 AM - 12:00 PM',
-            Sunday: 'Closed',
-        },
+    const location = useLocation();
+    const id = location.pathname.split('/')[2];
+
+    const [doctorr, setDoctor] = useState({});
+
+    const fetchDoctor = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/admin/doctor/${id}`, getAxiosConfig());
+            if (response.status === 200) {
+                let doctorData = response.data;
+                setDoctor(doctorData);
+
+            }
+        } catch (error) {
+            console.log("Failed to fetch doctor", error);
+        }
     };
+
+    useEffect(() => {
+        fetchDoctor();
+    }, [id]);
+
+
+
+
+
+
 
     return (
         <>
             <div>
                 <Navbar />
             </div>
-            <div className="w-11/12 mt-4 mx-auto p-8 ">
-                <div className="flex items-center ">
-                    <img
-                        src={doctor.photo}
-                        alt={doctor.name}
-                        className="w-48 h-48 rounded-2xl object-cover mr-6"
-                    />
-                    <div className='font-raleway'>
-                        <h2 className="text-2xl font-bold">{doctor.name}</h2>
-                        <p className="text-gray-600">{doctor.specialization}</p>
+            <div className="w-11/12 mt-4 mx-auto p-8">
+                <div className="flex items-center">
+                    {
+                        doctorr.profilePhoto && doctorr.profilePhoto.data && doctorr.profilePhoto.contentType ? (
+                            <img
+                                src={`data:${doctorr.profilePhoto.contentType};base64,${btoa(
+                                    new Uint8Array(doctorr.profilePhoto.data.data).reduce(
+                                        (data, byte) => data + String.fromCharCode(byte),
+                                        ''
+                                    )
+                                )}`}
+                                alt={doctorr.name}
+                                className="w-48 h-48 rounded-2xl object-cover mr-6"
+                            />
+                        ) : (
+                            <div className="w-48 h-48 rounded-2xl object-cover mr-6 bg-gray-200 flex items-center justify-center">
+                                <span className="text-gray-500">No Image</span>
+                            </div>
+                        )
+                    }
+                    <div className="font-raleway">
+                        <h2 className="text-2xl font-bold">Dr. {doctorr.name}</h2>
+                        <p className="text-gray-600">
+                            {doctorr.speciality} <span className='text-xs' >({doctorr.qualification})</span>
+                        </p>
 
                         <div className="mt-2">
-                            <div className='flex gap-2'>
+                            <div className="flex gap-2">
                                 <h3 className="font-semibold">Email</h3>
-                                <p>{doctor.email}</p>
+                                <p>{doctorr.email}</p>
                             </div>
-                            <div className='flex gap-2'>
+                            <div className="flex gap-2">
                                 <h3 className="font-semibold">Phone</h3>
-                                <p>{doctor.phone}</p>
+                                <p>{doctorr.phone}</p>
                             </div>
-                            <div className='flex gap-2'>
+                            <div className="flex gap-2">
                                 <h3 className="font-semibold">Address</h3>
-                                <p>{doctor.address}</p>
+                                <p>{doctorr.address}</p>
                             </div>
                         </div>
                     </div>
-
                 </div>
 
                 {/* Timeslots */}
                 <div className="mt-8 font-raleway">
                     <h3 className="text-xl font-bold text-left">Available Timeslots</h3>
                     <ul className="list-disc list-inside mt-2">
-                        {Object.entries(doctor.timeslots).map(([day, timeslot]) => (
-                            <li key={day} className="border-primary border-opacity-20 border-b px-2 py-2">
-                                <span className="font-semibold">{day}: </span>
-                                <span>{timeslot}</span>
-                            </li>
-                        ))}
+                        {doctorr.timeslots && doctorr.timeslots.length > 0 ? (
+                            doctorr.timeslots.map((timeslot, index) => (
+                                <li key={index} className="border-primary border-opacity-20 border-b px-2 py-2">
+                                    <span className="font-semibold">{timeslot.day}: </span>
+                                    {timeslot.startTime === '--' && timeslot.endTime === '--' ? (
+                                        <span>Not available</span>
+                                    ) : (
+                                        <span>
+                                            {timeslot.startTime} - {timeslot.endTime}
+                                        </span>
+                                    )}
+                                </li>
+                            ))
+                        ) : (
+                            <li>No timeslots available</li>
+                        )}
                     </ul>
                 </div>
             </div>
         </>
+
     );
 }
 
