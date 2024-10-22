@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard.js"
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AddDoctors from './pages/AddDoctors.js';
 import Profile from './pages/Profile.js';
+import UpdateDoctor from './pages/UpdateDoctor.js';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/add" element={<AddDoctors />} />
           <Route path="/profile/:id" element={<Profile />} />
+          <Route path="/update/:id" element={<UpdateDoctor />} />
         </Routes>
       </BrowserRouter>
     </div>

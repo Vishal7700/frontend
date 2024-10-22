@@ -7,6 +7,8 @@ import { faPenToSquare, faShare, faTrash } from '@fortawesome/free-solid-svg-ico
 import axios from 'axios'
 import { apiUrl, getAxiosConfig } from '../config.js'
 import Loader from '../loaders/Loader.js'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Dashboard() {
 
@@ -14,6 +16,8 @@ function Dashboard() {
   const [doctors, setDoctors] = useState([]);
   const [page, setPage] = useState(1);
   const [name, setName] = useState('');
+
+
 
 
   const fetchDoctors = async (page, limit, name) => {
@@ -45,6 +49,22 @@ function Dashboard() {
   const handlePreviousPage = () => {
     setPage((prevPage) => Math.max(prevPage - 1, 1));
   };
+
+  const deleteDoctor = async (doctorId) => {
+    setLoading(true);
+    try {
+      const response = await axios.delete(`${apiUrl}/admin/delete-doctor/${doctorId}`, getAxiosConfig());
+      if (response.status === 200) {
+        toast.success("Deleted Successfully")
+        fetchDoctors(page, 10, name);
+      }
+    } catch (error) {
+      console.error("Error deleting doctor:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
     <div>
@@ -91,8 +111,9 @@ function Dashboard() {
                     <td className="py-3 px-6 text-left">{doctor.phonenumber}</td>
                     <td className="py-3 px-12 text-left">
                       <div className="flex gap-2">
-                        <FontAwesomeIcon className='text-sm' color="teal" title="Update" icon={faPenToSquare} />
-                        <FontAwesomeIcon className='text-sm' color="red" title="Delete" icon={faTrash} />
+                        <Link to={`/update/${doctor._id}`}><FontAwesomeIcon className='text-sm' color="teal" title="Update" icon={faPenToSquare} />
+                        </Link>
+                        <FontAwesomeIcon onClick={() => deleteDoctor(doctor._id)} className='text-sm' color="red" title="Delete" icon={faTrash} />
                         <Link to={`/profile/${doctor._id}`} className="flex items-center">
                           <FontAwesomeIcon className='text-sm' color="green" title="Profile" icon={faShare} />
                         </Link>
@@ -103,14 +124,15 @@ function Dashboard() {
               </tbody>
             </table>
             <div className='flex justify-center gap-8 mt-4'>
-                <button className="w-20 bg-button text-white font-raleway rounded-lg py-2 hover:bg-buttonHover transition" onClick={handlePreviousPage}>Previous</button>
+              <button className="w-20 bg-button text-white font-raleway rounded-lg py-2 hover:bg-buttonHover transition" onClick={handlePreviousPage}>Previous</button>
               <p className='flex items-center justify-center border-2 border-primary border-opacity-50 rounded-lg px-4'>{page}</p>
-                <button className="w-20 bg-button text-white font-raleway rounded-lg py-2 hover:bg-buttonHover transition" onClick={handleNextPage}>Next</button>
-              </div>
+              <button className="w-20 bg-button text-white font-raleway rounded-lg py-2 hover:bg-buttonHover transition" onClick={handleNextPage}>Next</button>
+            </div>
 
           </div>
         )}
       </div>
+      <ToastContainer />
     </div>
   )
 }

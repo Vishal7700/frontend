@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
-import Navbar from './Navbar';
+import React, { useState, useEffect } from 'react';
+import Navbar from './Navbar'
 import axios from 'axios';
 import { apiUrl, getAxiosConfig } from '../config';
+import { useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-function AddDoctors() {
+function UpdateDoctor() {
 
+    const location = useLocation();
+    const id = location.pathname.split('/')[2];
     const navigate = useNavigate();
 
     const [name, setName] = useState('');
@@ -19,6 +22,28 @@ function AddDoctors() {
     const [address, setAddress] = useState('');
     const [profilePhoto, setProfilePhoto] = useState(null);
     const [timeslots, setTimeslots] = useState([{ day: '', startTime: '', endTime: '' }]);
+
+    useEffect(() => {
+        const fetchDoctorData = async () => {
+            try {
+                const response = await axios.get(`${apiUrl}/admin/doctor/${id}`, getAxiosConfig());
+                const doctorData = response.data;
+
+                setName(doctorData.name);
+                setEmail(doctorData.email);
+                setSpeciality(doctorData.speciality);
+                setQualification(doctorData.qualification);
+                setExperience(doctorData.experience);
+                setPhonenumber(doctorData.phonenumber);
+                setAddress(doctorData.address);
+                setTimeslots(doctorData.timeslots || [{ day: '', startTime: '', endTime: '' }]); 
+            } catch (error) {
+                console.error('Error fetching doctor data:', error);
+            }
+        };
+
+        fetchDoctorData();
+    }, [id]);
 
     const addTimeslot = () => {
         setTimeslots([...timeslots, { day: '', startTime: '', endTime: '' }]);
@@ -45,30 +70,34 @@ function AddDoctors() {
             data.append('profilePhoto', profilePhoto);
         }
 
-        data.append('timeslots', JSON.stringify(timeslots));
-
+        timeslots.forEach((slot) => {
+            data.append('timeslots', JSON.stringify(slot)); 
+        });
 
         try {
-            await axios.post(`${apiUrl}/admin/add-doctor`, data, getAxiosConfig(), {
+            await axios.put(`${apiUrl}/admin/update-doctor/${id}`, data, getAxiosConfig(), {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            toast.success("Doctor added successfully")
+            toast.success("Updated Successfully")
             setTimeout(() => {
-                navigate('/dashboard');
+                navigate('/dashboard');  
             }, 2000);
+           
         } catch (error) {
-            console.error('Error adding doctor:', error);
+            console.error('Error updating doctor:', error);
         }
     };
+
+
 
     return (
         <div>
             <Navbar />
             <div className='w-11/12 m-auto mt-12 flex items-center justify-center flex-col'>
                 <form onSubmit={handleSubmit} className='w-11/12 bg-white p-6 rounded-lg shadow-lg space-y-6'>
-                    <h2 className='text-2xl text-primary font-raleway font-bold '>Doctor's Registration</h2>
+                    <h2 className='text-2xl text-primary font-raleway font-bold '>Update Doctor</h2>
                     <div className='grid grid-cols-3 md:grid-cols-3 gap-4'>
                         <div>
                             <label className='block mb-1 text-text'>Name</label>
@@ -198,7 +227,7 @@ function AddDoctors() {
                                     type='button'
                                     onClick={() => removeTimeslot(index)}
                                     disabled={timeslots.length === 1}
-                                    className=''
+                                    className='w-32 text-text rounded-lg cursor-pointer hover:text-buttonHover'
                                 >
                                     Remove
                                 </button>
@@ -213,14 +242,14 @@ function AddDoctors() {
                         </button>
                     </div>
 
-                    <button type='submit' className='px-4 py-2 bg-button text-white rounded-lg hover:bg-buttonHover'>
-                        Add Doctor
+                    <button type='submit' className=' px-4 py-2 text-white bg-primary rounded-lg hover:bg-buttonHover'>
+                        Update Doctor
                     </button>
                 </form>
             </div>
             <ToastContainer />
         </div>
-    );
+    )
 }
 
-export default AddDoctors;
+export default UpdateDoctor
